@@ -36,10 +36,10 @@ export default {
 
 <template>
   <div>
-    <h1>都道府県一覧</h1>
+    <h1>都道府県別の総人口推移グラフ</h1>
     <div v-if="loading">Loading...</div>
-    <div v-else>
-      <div v-for="prefecture in prefectures" :key="prefecture.prefCode" >
+    <div v-else class="pref-container">
+      <div v-for="prefecture in prefectures" :key="prefecture.prefCode" class="pref-item">
         <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" />
         <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
       </div>
@@ -54,6 +54,18 @@ h1 {
 
 header {
   line-height: 1.5;
+}
+
+.pref-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 10%;
+}
+
+.pref-item {
+  width: calc(100% / 6);
+  box-sizing: border-box;
+  padding-top: 10;
 }
 
 @media (min-width: 1024px) {
