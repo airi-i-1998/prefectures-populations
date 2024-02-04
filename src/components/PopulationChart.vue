@@ -28,14 +28,12 @@ export default {
     };
   },
   mounted() {
-    // チャートを作成する処理は fetchPopulationData ではなく、mounted で行います
     this.createChart();
   },
-
   methods: {
     fetchPopulationData() {
       const selectedCodes = this.selectedPrefectures.join(',');
-      const apiKey = your - api - key;
+      const apiKey = your-api-key;
       this.loading = true;
       console.log(selectedCodes);
 
@@ -55,6 +53,37 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    createChart() {
+      const ctx = document.getElementById("prefChart");
+      console.log(ctx);
+
+      var prefChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: this.generateLabels(),
+        },
+        options: {
+          title: {
+            display: true,
+            text: "人口構成",
+          },
+          scales: {
+            x: {
+              type: 'category',
+              labels: ['1960年','1965年','1970年','1975年','1980年','1985年','1990年','1995年','2000年','2005年','2010年','2015年','2020年','2025年','2030年','2035年','2040年','2045年'],
+            },
+            y: {
+              suggestedMax: 12000000,
+              suggestedMin: 0,
+              stepSize: 1000000,
+              callback: function (value, index, values) {
+                return value + "人";
+              },
+            },
+          },
+        },
+      });
     },
   },
 };
