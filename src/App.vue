@@ -1,36 +1,38 @@
 <script>
 import axios from 'axios';
+import PopulationChart from './components/PopulationChart.vue';
 
 export default {
-  data() {
-    return {
-      prefectures: [],
-      loading: true,
-    };
-  },
-  mounted() {
+    data() {
+        return {
+            prefectures: [],
+            loading: true,
+        };
+    },
+    mounted() {
     const apiKey = your-api-key;
-    // APIリクエスト
-    axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
-      headers: {
-        'X-API-KEY': apiKey,
-      },
-    })
-      .then(response => {
-        console.log(response);  // レスポンスの確認
-        return response.data;
-      })
-      .then(data => {
-        console.log(data.result);  // データの確認
-        this.prefectures = data.result;
-      })
-      .catch(error => {
-        console.error('APIリクエストエラー:', error);
-      })
-      .finally(() => {
-        this.loading = false;
-      });
-  },
+        // APIリクエスト
+        axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
+            headers: {
+                'X-API-KEY': apiKey
+            }
+        })
+            .then(response => {
+            console.log(response); // レスポンスの確認
+            return response.data;
+        })
+            .then(data => {
+            console.log(data.result); // データの確認
+            this.prefectures = data.result;
+        })
+            .catch(error => {
+            console.error('APIリクエストエラー:', error);
+        })
+            .finally(() => {
+            this.loading = false;
+        });
+    },
+    components: { PopulationChart }
 }
 </script>
 
@@ -44,6 +46,7 @@ export default {
         <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
       </div>
     </div>
+    <PopulationChart />
   </div>
 </template>
 
