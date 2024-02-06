@@ -91,21 +91,40 @@ export default {
                   position: 'bottom',
                   title: {
                     display: true,
-                    text: '年',
+                    text: '年度',
                     font: {
                       size: 14,
                       weight: "bold",
                     },
                   },
                   ticks: {
+                    stepSize: 5,
                     callback: function (value) {
-                      return value.toString();
-                    }
-                  }
+                      return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "");
+                    },
+                  },
                 },
                 y: {
                   title: {
                     display: true,
+                    text: '人口',
+                    font: {
+                      size: 14,
+                      weight: "bold",
+                    },
+                  },
+                },
+              },
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.parsed.y;
+                      const formattedValue = value.toLocaleString();
+                      const year = context.parsed.x;
+                      const prefecture = context.dataset.label;
+                      return `${year}年 ${prefecture} ${formattedValue}人`;
+                    },
                   },
                 },
               },
@@ -186,9 +205,11 @@ export default {
 
 <template>
   <div>
-    <button @click="fetchPopulationData">表示</button>
+    <div class="button-container">
+      <button @click="fetchPopulationData" class="button">表示</button>
+    </div>
     <div v-if="loading || chartData.labels.length === 0">Loading...</div>
-    <div v-else>
+    <div v-else class="chart">
       <line-chart :data="chartData" :options="chartOptions"></line-chart>
     </div>
     <canvas id="prefChart"></canvas>
@@ -196,4 +217,17 @@ export default {
 </template>
 
 <style scoped>
+.button-container {
+  text-align: center;
+}
+
+.button {
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  font-size: medium;
+}
+
+.chart {
+  margin-top: 20px;
+}
 </style>
