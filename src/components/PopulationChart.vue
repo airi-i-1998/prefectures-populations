@@ -22,6 +22,7 @@ export default {
       chartOptions: {
         prefChart: null,
       },
+      selectedPrefectureNames: [],
     };
   },
   methods: {
@@ -91,14 +92,21 @@ export default {
                   title: {
                     display: true,
                     text: '年',
+                    font: {
+                      size: 14,
+                      weight: "bold",
+                    },
                   },
+                  ticks: {
+                    callback: function (value) {
+                      return value.toString();
+                    }
+                  }
                 },
                 y: {
                   title: {
                     display: true,
-                    text: '人口',
                   },
-                  angle: 90,
                 },
               },
             },
@@ -107,14 +115,15 @@ export default {
       }
     },
     parseChartData(rawData) {
-      if (!rawData || !rawData.length) {
+      if (!rawData || !rawData.length || !rawData[0].data) {
         console.error('Invalid data structure or missing data.');
         return { labels: [], datasets: [] };
       }
-      const labels = rawData[0].data ? rawData[0].data.map(entry => entry.year) : [];
-      const datasets = rawData.map(item => ({
-        label: this.getPrefectureName(item.label),
-        data: item.data ? item.data.map(entry => entry.value) : [],
+      const labels = rawData[0].data.map(entry => entry.year.toString());
+      console.log(labels);
+      const datasets = rawData.map((item, index) => ({
+        label: this.selectedPrefectureNames.length > index ? this.selectedPrefectureNames[index] : "",
+        data: item.data.map(entry => entry.value),
         borderColor: this.getRandomColor(),
         borderWidth: 2,
         fill: false,
@@ -133,9 +142,45 @@ export default {
       return color;
     },
   },
-  mounted() {
-    this.fetchPopulationData();
+  watch: {
+    selectedPrefectures: {
+      handler(newSelectedPrefectures) {
+        if (this.prefectures) {
+          this.selectedPrefectureNames = newSelectedPrefectures.map(prefCode => {
+            const prefecture = this.prefectures.find(pref => pref.prefCode === prefCode);
+            return prefecture ? prefecture.prefName : '';
+          });
+        }
+      },
+      immediate: true
+    }
   },
+  mounted() {
+    const apiKey = your-api-key;
+    // prefecturesの取得が完了してからfetchPopulationDataを呼び出す
+    axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
+      headers: {
+        'X-API-KEY': apiKey
+      }
+    })
+      .then(response => {
+        console.log(response);
+        return response.data;
+      })
+      .then(data => {
+        console.log(data.result);
+        console.log('Prefecture data:', data.result);
+        this.prefectures = data.result;
+        // prefecturesの取得が完了したらfetchPopulationDataを呼び出す
+        this.fetchPopulationData();
+      })
+      .catch(error => {
+        console.error('APIリクエストエラー:', error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+  }
 };
 </script>
 
