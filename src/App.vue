@@ -3,36 +3,38 @@ import axios from 'axios';
 import PopulationChart from './components/PopulationChart.vue';
 
 export default {
-    data() {
-        return {
-            prefectures: [],
-            loading: true,
-        };
-    },
-    mounted() {
+  data() {
+    return {
+      prefectures: [],
+      loading: true,
+      selectedPrefectures: [],
+      selectedPrefectureNames: [],
+    };
+  },
+  mounted() {
     const apiKey = your-api-key;
-        // APIリクエスト
-        axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
-            headers: {
-                'X-API-KEY': apiKey
-            }
-        })
-            .then(response => {
-            console.log(response); // レスポンスの確認
-            return response.data;
-        })
-            .then(data => {
-            console.log(data.result); // データの確認
-            this.prefectures = data.result;
-        })
-            .catch(error => {
-            console.error('APIリクエストエラー:', error);
-        })
-            .finally(() => {
-            this.loading = false;
-        });
-    },
-    components: { PopulationChart }
+    // APIリクエスト
+    axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
+      headers: {
+        'X-API-KEY': apiKey
+      }
+    })
+      .then(response => {
+        console.log(response); // レスポンスの確認
+        return response.data;
+      })
+      .then(data => {
+        console.log('Prefecture data:', data.result);
+        this.prefectures = data.result;
+      })
+      .catch(error => {
+        console.error('APIリクエストエラー:', error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+  },
+  components: { PopulationChart }
 }
 </script>
 
@@ -42,11 +44,12 @@ export default {
     <div v-if="loading">Loading...</div>
     <div v-else class="pref-container">
       <div v-for="prefecture in prefectures" :key="prefecture.prefCode" class="pref-item">
-        <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" />
+        <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" v-model="selectedPrefectures"
+          :value="prefecture.prefCode" />
         <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
       </div>
     </div>
-    <PopulationChart />
+    <PopulationChart :selectedPrefectures="selectedPrefectures" :selectedPrefectureNames="selectedPrefectureNames" />
   </div>
 </template>
 
