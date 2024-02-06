@@ -1,18 +1,11 @@
-<template>
-  <div>
-    <button @click="fetchPopulationData">表示</button>
-    <div v-if="loading">Loading...</div>
-    <div v-else>
-      <canvas id="prefChart"></canvas>
-    </div>
-  </div>
-</template>
-
 <script>
 import axios from 'axios';
-import { Chart } from 'chart.js/auto';
+import { Chart } from 'chart.js';
+import 'chart.js/auto';
+import { Line } from 'vue-chartjs';
 
 export default {
+  extends: Line,
   props: {
     selectedPrefectures: {
       type: Array,
@@ -22,72 +15,140 @@ export default {
   data() {
     return {
       loading: false,
-      chartData: {},
-      chartOptions: {},
-      prefectures: [], // 都道府県一覧を取得する場合は適切な API を利用して設定
+      chartData: {
+        labels: [],
+        datasets: [],
+      },
+      chartOptions: {
+        prefChart: null,
+      },
     };
-  },
-  mounted() {
-    this.createChart();
   },
   methods: {
     fetchPopulationData() {
-      const selectedCodes = this.selectedPrefectures.join(',');
+      if (this.prefChart) {
+        this.prefChart.destroy();
+        this.prefChart = null;
+      }
       const apiKey = your-api-key;
       this.loading = true;
-      console.log(selectedCodes);
-
-      axios.get("https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?prefCode=${selectedCodes}", {
-        headers: {
-          'X-API-KEY': apiKey,
-        },
-      })
-        .then(response => {
-          console.log(response); // レスポンス全体を確認
-          console.log(response.data); // データの部分だけを確認
-          this.chartData = this.parseChartData(response.data.result);
+      // 選択された都道府県ごとにAPIリクエストを実行
+      const requests = this.selectedPrefectures.map(prefCode => {
+        return axios.get(`https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${prefCode}`, {
+          headers: {
+            'X-API-KEY': apiKey,
+          },
+        });
+      });
+      // 全てのAPIリクエストが完了するまで待機
+      Promise.all(requests)
+        .then(responses => {
+          const prefectureData = responses.map(response => {
+            if (response && response.data && response.data.result && response.data.result.data) {
+              return response.data.result.data
+                .filter(item => item.label === '総人口')
+                .map(item => ({
+                  label: item.label,
+                  data: item.data,
+                }))[0];
+            } else {
+              console.error('API レスポンスの構造が不正です。');
+              return null;
+            }
+          });
+          // チャートデータを設定
+          this.chartData = this.parseChartData(prefectureData);
+          this.createChart();
         })
         .catch(error => {
           console.error('API リクエストエラー:', error);
+          console.error('Complete Error Object:', JSON.stringify(error, null, 2));
         })
         .finally(() => {
           this.loading = false;
         });
     },
     createChart() {
-      const ctx = document.getElementById("prefChart");
-      console.log(ctx);
-
-      var prefChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: this.generateLabels(),
-        },
-        options: {
-          title: {
-            display: true,
-            text: "人口構成",
-          },
-          scales: {
-            x: {
-              type: 'category',
-              labels: ['1960年','1965年','1970年','1975年','1980年','1985年','1990年','1995年','2000年','2005年','2010年','2015年','2020年','2025年','2030年','2035年','2040年','2045年'],
+      if (this.chartData && this.chartData.labels && this.chartData.datasets) {
+        const ctx = document.getElementById("prefChart");
+        if (ctx) {
+          const context = ctx.getContext('2d');
+          context.clearRect(0, 0, ctx.width, ctx.height);
+          this.prefChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: this.chartData.labels,
+              datasets: this.chartData.datasets,
             },
-            y: {
-              suggestedMax: 12000000,
-              suggestedMin: 0,
-              stepSize: 1000000,
-              callback: function (value, index, values) {
-                return value + "人";
+            options: {
+              title: {
+                display: true,
+              },
+              scales: {
+                x: {
+                  type: 'linear',
+                  position: 'bottom',
+                  title: {
+                    display: true,
+                    text: '年',
+                  },
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: '人口',
+                  },
+                  angle: 90,
+                },
               },
             },
-          },
-        },
-      });
+          });
+        }
+      }
     },
+    parseChartData(rawData) {
+      if (!rawData || !rawData.length) {
+        console.error('Invalid data structure or missing data.');
+        return { labels: [], datasets: [] };
+      }
+      const labels = rawData[0].data ? rawData[0].data.map(entry => entry.year) : [];
+      const datasets = rawData.map(item => ({
+        label: this.getPrefectureName(item.label),
+        data: item.data ? item.data.map(entry => entry.value) : [],
+        borderColor: this.getRandomColor(),
+        borderWidth: 2,
+        fill: false,
+      }));
+      return {
+        labels,
+        datasets,
+      };
+    },
+    getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    },
+  },
+  mounted() {
+    this.fetchPopulationData();
   },
 };
 </script>
+
+<template>
+  <div>
+    <button @click="fetchPopulationData">表示</button>
+    <div v-if="loading || chartData.labels.length === 0">Loading...</div>
+    <div v-else>
+      <line-chart :data="chartData" :options="chartOptions"></line-chart>
+    </div>
+    <canvas id="prefChart"></canvas>
+  </div>
+</template>
 
 <style scoped>
 </style>

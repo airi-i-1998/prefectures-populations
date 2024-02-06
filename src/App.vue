@@ -7,6 +7,7 @@ export default {
         return {
             prefectures: [],
             loading: true,
+            selectedPrefectures: [],
         };
     },
     mounted() {
@@ -42,11 +43,11 @@ export default {
     <div v-if="loading">Loading...</div>
     <div v-else class="pref-container">
       <div v-for="prefecture in prefectures" :key="prefecture.prefCode" class="pref-item">
-        <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" />
+        <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" v-model="selectedPrefectures" :value="prefecture.prefCode" />
         <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
       </div>
     </div>
-    <PopulationChart />
+    <PopulationChart :selectedPrefectures="selectedPrefectures" />
   </div>
 </template>
 
