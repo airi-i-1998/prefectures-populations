@@ -41,14 +41,15 @@ export default {
 <template>
   <div>
     <h1>都道府県別の総人口推移グラフ</h1>
-    <div v-if="loading">Loading...</div>
-    <div v-else class="pref-container">
-      <div v-for="prefecture in prefectures" :key="prefecture.prefCode" class="pref-item">
-        <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" v-model="selectedPrefectures"
-          :value="prefecture.prefCode" />
-        <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
+      <span class="pref">＜都道府県一覧＞</span>
+      <div v-if="loading">Loading...</div>
+      <div v-else class="pref-container">
+        <div v-for="prefecture in prefectures" :key="prefecture.prefCode" class="pref-item">
+          <input type="checkbox" :id="'prefecture-' + prefecture.prefCode" v-model="selectedPrefectures"
+            :value="prefecture.prefCode" />
+          <label :for="'prefecture-' + prefecture.prefCode">{{ prefecture.prefName }}</label>
+        </div>
       </div>
-    </div>
     <PopulationChart :selectedPrefectures="selectedPrefectures" :selectedPrefectureNames="selectedPrefectureNames" />
   </div>
 </template>
@@ -62,16 +63,23 @@ header {
   line-height: 1.5;
 }
 
+.pref{
+  padding-left: 10px;
+  font-size: 20px;
+}
 .pref-container {
   display: flex;
   flex-wrap: wrap;
-  margin-left: 10%;
+  align-items: center;
 }
 
 .pref-item {
-  width: calc(100% / 6);
+  width: calc(100% / 5);
+  padding: 10px 15px 0 0;
   box-sizing: border-box;
   padding-top: 10;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 @media (min-width: 1024px) {
