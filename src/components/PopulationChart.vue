@@ -31,7 +31,8 @@ export default {
         this.prefChart.destroy();
         this.prefChart = null;
       }
-      const apiKey = your-api-key;
+      const apiKey =  import.meta.env.VITE_APP_RESAS_API_KEY
+      // const apiKey = "50FXDSxFzOObNVDiZW9EBtkJxMWdYjtlrPsP9DH7";
       this.loading = true;
       // 選択された都道府県ごとにAPIリクエストを実行
       const requests = this.selectedPrefectures.map(prefCode => {
@@ -175,7 +176,7 @@ export default {
     }
   },
   mounted() {
-    const apiKey = your-api-key;
+    const apiKey =  import.meta.env.VITE_APP_RESAS_API_KEY
     // prefecturesの取得が完了してからfetchPopulationDataを呼び出す
     axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
       headers: {
