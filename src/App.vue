@@ -12,7 +12,7 @@ export default {
     };
   },
   mounted() {
-    const apiKey = your-api-key;
+    const apiKey =  import.meta.env.VITE_APP_RESAS_API_KEY
     // APIリクエスト
     axios.get('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
       headers: {
