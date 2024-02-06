@@ -191,7 +191,6 @@ export default {
         console.log(data.result);
         console.log('Prefecture data:', data.result);
         this.prefectures = data.result;
-        // prefecturesの取得が完了したらfetchPopulationDataを呼び出す
         this.fetchPopulationData();
       })
       .catch(error => {
