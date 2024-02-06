@@ -55,7 +55,7 @@ export default {
 </template>
 
 <style scoped>
-h1 {
+h1{
   text-align: center;
 }
 
@@ -64,13 +64,14 @@ header {
 }
 
 .pref{
-  padding-left: 10px;
+  display: block;
+  margin-left: 5%;
   font-size: 20px;
 }
 .pref-container {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  text-align: center;
 }
 
 .pref-item {
