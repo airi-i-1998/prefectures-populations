@@ -32,7 +32,6 @@ export default {
         this.prefChart = null;
       }
       const apiKey =  import.meta.env.VITE_APP_RESAS_API_KEY
-      // const apiKey = "50FXDSxFzOObNVDiZW9EBtkJxMWdYjtlrPsP9DH7";
       this.loading = true;
       // 選択された都道府県ごとにAPIリクエストを実行
       const requests = this.selectedPrefectures.map(prefCode => {
